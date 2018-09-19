@@ -52,6 +52,8 @@ bestdevname=
 image_part=
 local_part=
 ro_ntfs=
+
+search_partitions() {
 for sysblock in $(echo /sys/block/* | tr ' ' '\n' | grep -v loop); do
     n=${sysblock##*/}
     if [ "${n#fd}" != "$n" ]; then
@@ -108,6 +110,18 @@ for sysblock in $(echo /sys/block/* | tr ' ' '\n' | grep -v loop); do
         break
     fi
 done
+}
+
+prev_quiet=$quiet
+for i in `range 1 15`; do
+    search_partitions
+    if [ -n "${image_part}" ]; then
+        break
+    fi
+    sleep 1
+    quiet=y
+done
+quiet=$prev_quiet
 
 [ -z "${image_part}" ] && panic "Could not find the USB stick!"
 
