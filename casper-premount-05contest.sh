@@ -113,13 +113,15 @@ done
 }
 
 prev_quiet=$quiet
-for i in `range 1 15`; do
+i=0
+while [ "$i" -lt 15 ]; do
     search_partitions
     if [ -n "${image_part}" ]; then
         break
     fi
     sleep 1
     quiet=y
+    i="$(($i + 1))"
 done
 quiet=$prev_quiet
 
