@@ -19,6 +19,22 @@ esac
 . /scripts/casper-functions
 . /scripts/casper-helpers
 
+is_ro_mount() {
+    mountp="$1"
+    mount_options=$(grep "^${mountp} " /proc/mounts | cut -d' ' -f4)
+    case ",$mount_options," in
+        *,rw,*)
+            return 1
+            ;;
+        *,ro,*)
+            return 0
+            ;;
+        *)
+            # Hmm, neither rw nor ro? Probably not read-only
+            return 1
+    esac
+}
+
 [ -z "$FLAVOUR" ] && panic "No \$FLAVOUR set!"
 
 USB_IMAGE_MARKER=CONTEST
@@ -35,6 +51,7 @@ bestfreespace=0
 bestdevname=
 image_part=
 local_part=
+ro_ntfs=
 for sysblock in $(echo /sys/block/* | tr ' ' '\n' | grep -v loop); do
     n=${sysblock##*/}
     if [ "${n#fd}" != "$n" ]; then
@@ -61,6 +78,10 @@ for sysblock in $(echo /sys/block/* | tr ' ' '\n' | grep -v loop); do
                 [ "$quiet" = "y" ] || printf " contains $USB_IMAGE_MARKER\n"
                 image_part=$devname
                 mount -o move "${MOUNTP_CONTEST_TMP}" "${MOUNTP_IMAGE}"
+            elif [ "$fstype" == "ntfs" ] && is_ro_mount "${MOUNTP_CONTEST_TMP}"; then
+                # Mountpoint is read-only NTFS.
+                ro_ntfs="${devname}"
+                umount "${MOUNTP_CONTEST_TMP}"
             elif [ -e "${MOUNTP_CONTEST_TMP}/$FLAVOUR" ]; then
                 [ "$quiet" = "y" ] || printf " contains $FLAVOUR\n"
                 # TODO: Verify that the files are actually there.
@@ -92,8 +113,6 @@ done
 
 if [ -z "${local_part}" ]; then
 
-    [ "$bestfreespace" -eq 0 ] && panic "Could not find any suitable local partition!"
-
     # We need to copy over ${mountpoint}. How large a backing file should we create?
 
     image_size=$(du -ks "${MOUNTP_IMAGE}/filesystem.squashfs" | cut -f1)
@@ -102,7 +121,22 @@ if [ -z "${local_part}" ]; then
     total_size=$(expr ${total_size} + ${total_size} / 20) # 5% more to be sure
     total_mb=$(expr ${total_size} / 1024)
 
-    [ "$bestfreespace" -lt "$total_size" ] && panic "No suitable local partition has $total_size K free space!"
+    if [ "$bestfreespace" -lt "$total_size" ]; then
+        if [ -n "${ro_ntfs}" ]; then
+            echo
+            echo
+            echo
+            echo "One of your NTFS partitions (${ro_ntfs}) was write-protected,"
+            echo "probably because \"Fast startup\" is enabled in Windows."
+            echo
+            echo "Go to \"Choose what the power buttons do\" in Control Panel"
+            echo "and disable \"Turn on fast startup (recommended)\" and try again."
+            echo
+            echo
+            echo
+        fi
+        panic "No suitable local partition has $total_size K free space!"
+    fi
 
     # Success: We found a partition with enough space. Create $FLAVOUR directory.
     [ "$quiet" = "y" ] || printf "Begin: Mount and allocate on ${bestdevname}\n"
