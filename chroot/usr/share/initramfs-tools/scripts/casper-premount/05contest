@@ -56,8 +56,8 @@ ro_ntfs=
 search_partitions() {
 for sysblock in $(echo /sys/block/* | tr ' ' '\n' | grep -v loop); do
     n=${sysblock##*/}
-    if [ "${n#fd}" != "$n" ]; then
-        # Do not probe floppies
+    if [ "${n#fd}" != "$n" -o "${n#sr}" != "$n" ]; then
+        # Do not probe floppies or cdrom drives
         continue
     fi
     for dev in $(subdevices "${sysblock}"); do
