@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=IntelliJ IDEA Community Edition
+Icon=/opt/idea-IC-182.4323.46/bin/idea.png
+Exec="/opt/idea-IC-182.4323.46/bin/idea.sh" %f
+Comment=Capable and Ergonomic IDE for JVM
+Categories=Development;IDE;
+Terminal=false
+StartupWMClass=jetbrains-idea-ce
