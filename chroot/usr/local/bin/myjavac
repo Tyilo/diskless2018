@@ -1,0 +1,3 @@
+#!/bin/sh
+# TODO: -sourcepath {path} -d {path}
+exec javac -encoding UTF-8 "$@"

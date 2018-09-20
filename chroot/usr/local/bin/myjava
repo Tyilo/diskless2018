@@ -1,0 +1,3 @@
+#!/bin/sh
+# TODO: -Xms{memlim}m -Xmx{memlim}m
+exec java -XX:+UseSerialGC -Xss64m -Dfile.encoding=UTF-8 "$@"

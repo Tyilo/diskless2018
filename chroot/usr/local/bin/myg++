@@ -1,0 +1,2 @@
+#!/bin/sh
+exec g++ -g -O2 -static -std=gnu++14 "$@"
