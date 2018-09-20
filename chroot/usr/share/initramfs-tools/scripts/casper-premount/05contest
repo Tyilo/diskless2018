@@ -197,7 +197,7 @@ if ! [ -e "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs" ]; then
     cp "${MOUNTP_IMAGE}/filesystem.squashfs" "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs" || panic "Failed to copy filesystem.squashfs"
 fi
 
-if [ -n "$copy_home" ]; then
+if ! [ -e "${MOUNTP_LOCAL}/$FLAVOUR/home-image" ]; then
     cp "${MOUNTP_IMAGE}/home.ext2" "${MOUNTP_LOCAL}/$FLAVOUR/home-image" || panic "Failed to copy home.ext2"
 fi
 
