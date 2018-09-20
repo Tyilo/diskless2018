@@ -84,9 +84,8 @@ for sysblock in $(echo /sys/block/* | tr ' ' '\n' | grep -v loop); do
                 # Mountpoint is read-only NTFS.
                 ro_ntfs="${devname}"
                 umount "${MOUNTP_CONTEST_TMP}"
-            elif [ -e "${MOUNTP_CONTEST_TMP}/$FLAVOUR" ]; then
+            elif [ -d "${MOUNTP_CONTEST_TMP}/$FLAVOUR" ]; then
                 [ "$quiet" = "y" ] || printf " contains $FLAVOUR\n"
-                # TODO: Verify that the files are actually there.
                 local_part=$devname
                 mount -o move "${MOUNTP_CONTEST_TMP}" "${MOUNTP_LOCAL}"
             else
@@ -122,20 +121,20 @@ while [ "$i" -lt 15 ]; do
     sleep 1
     quiet=y
     i="$(($i + 1))"
+    echo "Could not find USB stick containing contest image. Retry..."
 done
 quiet=$prev_quiet
 
 [ -z "${image_part}" ] && panic "Could not find the USB stick!"
 
+# We might need to copy over ${mountpoint}. How large a backing file should we create?
+image_size=$(du -ks "${MOUNTP_IMAGE}/filesystem.squashfs" | cut -f1)
+home_size=$(du -ks "${MOUNTP_IMAGE}/home.ext2" | cut -f1)
+total_size=$(expr ${image_size} + ${home_size})
+total_size=$(expr ${total_size} + ${total_size} / 20) # 5% more to be sure
+total_mb=$(expr ${total_size} / 1024)
+
 if [ -z "${local_part}" ]; then
-
-    # We need to copy over ${mountpoint}. How large a backing file should we create?
-
-    image_size=$(du -ks "${MOUNTP_IMAGE}/filesystem.squashfs" | cut -f1)
-    home_size=$(du -ks "${MOUNTP_IMAGE}/home.ext2" | cut -f1)
-    total_size=$(expr ${image_size} + ${home_size})
-    total_size=$(expr ${total_size} + ${total_size} / 20) # 5% more to be sure
-    total_mb=$(expr ${total_size} / 1024)
 
     if [ "$bestfreespace" -lt "$total_size" ]; then
         if [ -n "${ro_ntfs}" ]; then
@@ -155,16 +154,51 @@ if [ -z "${local_part}" ]; then
     fi
 
     # Success: We found a partition with enough space. Create $FLAVOUR directory.
-    [ "$quiet" = "y" ] || printf "Begin: Mount and allocate on ${bestdevname}\n"
     mountp="/mnt/apartment"
     mkdir -p "${mountp}"
     mount -t "${bestdevfstype}" -o rw "${bestdevname}" "${MOUNTP_LOCAL}" || panic "Could not mount ${bestdevname}"
     local_part="${bestdevname}"
     mkdir "${MOUNTP_LOCAL}/$FLAVOUR" || panic "Could not create directory $FLAVOUR"
-    echo "Copying contest image filesystem for the first boot... This may take a while ($total_mb MB)"
+fi
+
+if [ -e "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs" ]; then
+    existing_size=$(du --apparent-size -bs "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs" | cut -f1)
+    expected_size=$(du --apparent-size -bs "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs" | cut -f1)
+    if [ "$existing_size" != "$expected_size" ]; then
+        echo "filesystem.squashfs has wrong size (expected $expected_size, found $existing_size), deleting"
+        rm "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs"
+    fi
+fi
+
+if [ -e "${MOUNTP_LOCAL}/$FLAVOUR/home-image" ]; then
+    existing_size=$(du --apparent-size -bs "${MOUNTP_LOCAL}/$FLAVOUR/home-image" | cut -f1)
+    expected_size=$(du --apparent-size -bs "${MOUNTP_IMAGE}/home.ext2" | cut -f1)
+    if [ "$existing_size" != "$expected_size" ]; then
+        # home has wrong size, but we shouldn't delete it if we can avoid it.
+        # If it cannot be mounted, delete it.
+        if mount "${MOUNTP_LOCAL}/$FLAVOUR/home-image" "${MOUNTP_CONTEST_TMP}"; then
+            umount "${MOUNTP_CONTEST_TMP}"
+        else
+            echo "Cannot mount home-image, deleting and recopying"
+            rm "${MOUNTP_LOCAL}/$FLAVOUR/home-image"
+        fi
+    fi
+fi
+
+if ! [ -e "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs" ]; then
+    echo
+    echo
+    echo
+    echo "Copying contest image filesystem for the first boot..."
+    echo "This might take a couple of minutes ($total_mb MB)"
+    echo
+    echo
+    echo
     cp "${MOUNTP_IMAGE}/filesystem.squashfs" "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs" || panic "Failed to copy filesystem.squashfs"
+fi
+
+if [ -n "$copy_home" ]; then
     cp "${MOUNTP_IMAGE}/home.ext2" "${MOUNTP_LOCAL}/$FLAVOUR/home-image" || panic "Failed to copy home.ext2"
-    [ "$quiet" = "y" ] || printf "Done: Mount and allocate on ${bestdevname}\n"
 fi
 
 echo "export LIVEMEDIA=$local_part" >> /conf/param.conf
@@ -177,4 +211,12 @@ umount "${MOUNTP_IMAGE}"
 # This fails if $MP_QUIET is empty. Set it to -q to make things work.
 echo "export MP_QUIET=-q" >> /conf/param.conf
 
+echo
+echo
+echo
 echo "It is now safe to remove the contest USB stick"
+echo
+echo
+echo
+
+sleep 1
