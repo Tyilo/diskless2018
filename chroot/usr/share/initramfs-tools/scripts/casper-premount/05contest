@@ -162,8 +162,8 @@ if [ -z "${local_part}" ]; then
 fi
 
 if [ -e "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs" ]; then
-    existing_size=$(du --apparent-size -bs "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs" | cut -f1)
-    expected_size=$(du --apparent-size -bs "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs" | cut -f1)
+    existing_size=$(stat -c "%s" "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs")
+    expected_size=$(stat -c "%s" "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs")
     if [ "$existing_size" != "$expected_size" ]; then
         echo "filesystem.squashfs has wrong size (expected $expected_size, found $existing_size), deleting"
         rm "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs"
@@ -171,8 +171,8 @@ if [ -e "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs" ]; then
 fi
 
 if [ -e "${MOUNTP_LOCAL}/$FLAVOUR/home-image" ]; then
-    existing_size=$(du --apparent-size -bs "${MOUNTP_LOCAL}/$FLAVOUR/home-image" | cut -f1)
-    expected_size=$(du --apparent-size -bs "${MOUNTP_IMAGE}/home.ext2" | cut -f1)
+    existing_size=$(stat -c "%s" "${MOUNTP_LOCAL}/$FLAVOUR/home-image")
+    expected_size=$(stat -c "%s" "${MOUNTP_IMAGE}/home.ext2")
     if [ "$existing_size" != "$expected_size" ]; then
         # home has wrong size, but we shouldn't delete it if we can avoid it.
         # If it cannot be mounted, delete it.
