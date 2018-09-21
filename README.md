@@ -163,21 +163,24 @@ We set the `TERM` environment variable since the chroot might not have the same
 terminal definitions as your host system, but dpkg-reconfigure depends on
 `TERM` being set to something sensible.
 
-Next, we need to add the "universe" repository to download most interesting
-software packages in Ubuntu. Open the `sources.list` file with `vi`:
+Next, we need to add the "universe" repository as well as security updates.
 
 ```
-vi etc/apt/sources.list
+cat > etc/apt/sources.list <<EOF
+deb http://dk.archive.ubuntu.com/ubuntu bionic main universe
+deb http://security.ubuntu.com/ubuntu/ bionic-security universe main
+deb http://dk.archive.ubuntu.com/ubuntu bionic-updates universe main
+EOF
 ```
 
-In vi, press `A` to append at the end of the line, type ` universe`, Escape, `:wq`, and Return.
+(Remember to replace `dk.archive.ubuntu.com` with a mirror near you.)
 
 Next, we install the packages we want. I have curated a list of packages
 which should probably be trimmed down for the purposes of this guide,
 but anyway here it is:
 
 ```
-apt-get update && apt-get install linux-image-generic build-essential casper rsync git emacs nano vim-gtk3 mate-desktop-environment firefox xorg bc acl alsa-base anacron linux-sound-base mate-indicator-applet mate-indicator-applet-common pciutils poppler-utils pulseaudio pulseaudio-utils rfkill session-migration software-properties-common software-properties-gtk ssl-cert ubuntu-drivers-common ubuntu-sounds usbutils wget wireless-tools wpasupplicant network-manager network-manager-gnome network-manager-openvpn-gnome network-manager-pptp-gnome acpi-support appmenu-gtk2-module appmenu-gtk3-module exfat-fuse fwupd fwupdate fwupdate-signed gdb indicator-application indicator-power indicator-sound laptop-detect mate-accessibility-profiles mate-applet-appmenu mate-dock-applet mate-hud mate-menu mate-netbook mate-optimus mate-sensors-applet mate-tweak mate-window-buttons-applet mate-window-menu-applet mate-window-title-applet pm-utils ubuntu-mate-artwork libgconf-2-4 gconf-service python{,3}-{pip,setuptools} python{,3}-requests pypy clang gedit apport- grub-pc- blueman- thunderbird- unattended-upgrades-
+apt-get update && apt-get install linux-image-generic build-essential casper rsync git emacs nano vim-gtk3 mate-desktop-environment firefox xorg bc acl alsa-base anacron linux-sound-base mate-indicator-applet mate-indicator-applet-common pciutils poppler-utils pulseaudio pulseaudio-utils rfkill session-migration software-properties-common software-properties-gtk ssl-cert ubuntu-drivers-common ubuntu-sounds usbutils wget wireless-tools wpasupplicant network-manager network-manager-gnome network-manager-openvpn-gnome network-manager-pptp-gnome acpi-support appmenu-gtk2-module appmenu-gtk3-module exfat-fuse fwupd fwupdate fwupdate-signed gdb indicator-application indicator-power indicator-sound laptop-detect mate-accessibility-profiles mate-applet-appmenu mate-dock-applet mate-hud mate-menu mate-netbook mate-optimus mate-sensors-applet mate-tweak mate-window-buttons-applet mate-window-menu-applet mate-window-title-applet pm-utils ubuntu-mate-artwork libgconf-2-4 gconf-service python{,3}-{pip,setuptools} python{,3}-requests pypy clang gedit command-not-found xbacklight apport- grub-pc- blueman- thunderbird- unattended-upgrades-
 ```
 
 The above list critically contains `casper`, which installs a bunch of scripts
