@@ -23,7 +23,7 @@ mkdir -p mnt-$DISK/efi mnt-$DISK/usb
 ACTUAL_VENDOR=`cat /sys/class/block/$DISK/device/vendor`
 ACTUAL_MODEL=`cat /sys/class/block/$DISK/device/model`
 case "$ACTUAL_VENDOR" in
-	"Teclast "|"UDISK   ")
+	"Teclast "|"UDISK   "|'SMI     ')
 		;;
 	*)
 		echo "$DISK: Unrecognized vendor '$ACTUAL_VENDOR'"
@@ -31,7 +31,7 @@ case "$ACTUAL_VENDOR" in
 		;;
 esac
 case "$ACTUAL_MODEL" in
-	"CoolFlash USB3.0"|'USB 3.0         ')
+	"CoolFlash USB3.0"|'USB 3.0         '|'USB DISK        ')
 		;;
 	*)
 		echo "$DISK: Unrecognized model '$ACTUAL_MODEL'"
