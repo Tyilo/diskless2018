@@ -35,6 +35,8 @@ You need the following files in `image/`:
 * image/initrd (50 MB)
 * image/vmlinuz (8 MB)
 
+Run `./dl.sh` to download the large files.
+
 If the USB drive is at `/dev/sdx`, run the command:
 
 ```
