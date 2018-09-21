@@ -119,7 +119,20 @@ which we populate with the `boot/grub/grub.cfg` file and the empty `CONTEST` mar
 We will also need `mnt-home` to mount the home partition, so create that now.
 
 ```
-mkdir -p image/boot/grub mnt-home && touch image/CONTEST && cp ../grub.cfg image/boot/grub
+mkdir -p image/boot/grub mnt-home && touch image/CONTEST
+cat > image/boot/grub/grub.cfg <<'EOF'
+search --set=root --file /CONTEST
+
+insmod all_video
+
+set default="0"
+set timeout=1
+
+menuentry "Ubuntu 18.04 Contest Edition" {
+    linux /vmlinuz boot=casper nomodeset noprompt
+    initrd /initrd
+}
+EOF
 ```
 
 ----
