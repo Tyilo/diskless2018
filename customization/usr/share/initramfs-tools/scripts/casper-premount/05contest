@@ -163,7 +163,8 @@ fi
 
 if [ -e "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs" ]; then
     existing_size=$(stat -c "%s" "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs")
-    expected_size=$(stat -c "%s" "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs")
+    expected_size=$(stat -c "%s" "${MOUNTP_IMAGE}/filesystem.squashfs")
+    [ "$?" -ne 0 ] && panic "Couldn't stat ${MOUNTP_IMAGE}/filesystem.squashfs"
     if [ "$existing_size" != "$expected_size" ]; then
         echo "filesystem.squashfs has wrong size (expected $expected_size, found $existing_size), deleting"
         rm "${MOUNTP_LOCAL}/$FLAVOUR/filesystem.squashfs"
