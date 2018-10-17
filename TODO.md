@@ -15,6 +15,8 @@ Future work (after 2018)
 
 * Copy over a directory on the USB drive to /home/contest on every boot to allow adding files in the last minute, e.g. sample inputs and outputs.
 
+* Use signed Ubuntu kernel to avoid having to disable Secure boot
+
 Configuring /home
 -----------------
 
