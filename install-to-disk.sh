@@ -62,7 +62,8 @@ esac
 
 if `mount | grep -q /dev/$DISK`; then
 	echo "$DISK appears to be mounted!"
-	exit 1
+	echo "Unmounting..."
+	echo "/dev/$DISK"?* | xargs -n1 umount -l
 fi
 
 parted --script "/dev/$DISK" \
