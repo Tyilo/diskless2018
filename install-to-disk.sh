@@ -18,6 +18,27 @@ case "$1" in
 		;;
 esac
 
+REQUIRED_FILES=(
+	CONTEST
+	boot/grub/grub.cfg
+	filesystem.squashfs
+	home.ext2
+	initrd
+	vmlinuz
+)
+
+missing=false
+for f in "${REQUIRED_FILES[@]}"; do
+	if [ ! -f "image/$f" ]; then
+		missing=true
+		echo "Missing file: image/$f"
+	fi
+done
+
+if $missing; then
+	exit 1
+fi
+
 mkdir -p mnt-$DISK/efi mnt-$DISK/usb
 
 ACTUAL_VENDOR=`cat /sys/class/block/$DISK/device/vendor`
