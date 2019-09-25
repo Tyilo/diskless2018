@@ -1,0 +1,2 @@
+#!/bin/sh
+exec myfpc -O2 -XS -Xt "$@"

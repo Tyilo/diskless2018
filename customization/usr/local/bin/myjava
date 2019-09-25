@@ -1,3 +1,3 @@
 #!/bin/sh
-# TODO: -Xms{memlim}m -Xmx{memlim}m
-exec java -XX:+UseSerialGC -Xss64m -Dfile.encoding=UTF-8 "$@"
+memlim=$(default_memlim)
+exec java -Dfile.encoding=UTF-8 -XX:+UseSerialGC -Xss64m -Xms${memlim}m -Xmx${memlim}m -cp "$PWD" "$@"

@@ -1,0 +1,7 @@
+#!/bin/bash
+# Limit in MB
+memlim=1024
+
+echo "Warning: Memory limit set to $memlim MB." >&2
+echo "Ensure that this is actually correct for the problem." >&2
+echo -n "$memlim"

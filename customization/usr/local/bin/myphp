@@ -1,0 +1,3 @@
+#!/bin/sh
+memlim=$(default_memlim)
+exec php -n -d display_errors=stderr -d html_errors=0 -d memory_limit=${memlim}m "$@"

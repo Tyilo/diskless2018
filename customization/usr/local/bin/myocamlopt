@@ -1,0 +1,2 @@
+#!/bin/bash
+exec ocamlopt unix.cmxa str.cmxa bigarray.cmxa "$@"

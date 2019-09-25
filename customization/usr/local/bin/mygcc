@@ -1,2 +1,2 @@
 #!/bin/sh
-exec gcc -g -O2 -std=gnu99 -static "$@" -lm
+exec gcc -g -O2 -std=gnu11 -static "$@" -lm

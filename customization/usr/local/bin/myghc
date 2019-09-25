@@ -1,0 +1,2 @@
+#!/bin/sh
+exec ghc -O2 -ferror-spans -threaded -rtsopts "$@"

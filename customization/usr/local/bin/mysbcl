@@ -1,0 +1,2 @@
+#!/bin/bash
+exec sbcl --control-stack-size 4 --noinform --noprint --non-interactive --eval "(if (equal (compile-file \"$1\") NIL) (sb-ext:exit :code 43) ())"

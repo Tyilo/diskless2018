@@ -1,0 +1,2 @@
+#!/bin/sh
+exec prolog -O -q -g main -t halt -c "$@"

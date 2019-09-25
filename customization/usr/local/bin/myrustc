@@ -1,0 +1,2 @@
+#!/bin/sh
+exec rustc -O --crate-type bin --edition=2018 "$@"

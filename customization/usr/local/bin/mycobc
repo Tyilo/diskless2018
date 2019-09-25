@@ -1,0 +1,2 @@
+#!/bin/bash
+exec mycobc -g -O2 -std=default -free -x -static "$@"

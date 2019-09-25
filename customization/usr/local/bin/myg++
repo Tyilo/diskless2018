@@ -1,2 +1,2 @@
 #!/bin/sh
-exec g++ -g -O2 -static -std=gnu++14 "$@"
+exec g++ -g -O2 -std=gnu++17 -static "$@"
