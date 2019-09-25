@@ -12,15 +12,9 @@ sudo rm -rf "$CHROOT"
 mkdir "$CHROOT"
 sudo debootstrap --arch amd64 bionic "$CHROOT" http://dk.archive.ubuntu.com/ubuntu/
 
-echo bbbb
-
 sudo mount -t proc proc "$CHROOT"/proc
 
-echo aaa
-
 mkdir -p "$MNT_HOME"
-
-echo bb
 
 sudo env -i chroot "$CHROOT" /bin/su <<'EOF'
 set -x
