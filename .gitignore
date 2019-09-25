@@ -3,3 +3,4 @@ image/filesystem.squashfs
 image/home.ext2
 image/initrd
 image/vmlinuz
+test.img
