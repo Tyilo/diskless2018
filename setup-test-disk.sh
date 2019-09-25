@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-dd if=/dev/zero of=test.img bs=1M count=10240
+dd if=/dev/zero of=test.img bs=1M count=10240 status=progress
 LOOPDEV=$(losetup -f --show test.img)
 
 parted --script "$LOOPDEV" \

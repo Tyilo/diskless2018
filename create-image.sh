@@ -262,7 +262,7 @@ cp_kernel() {
 create_homefs() {
   mkdir -p "$MNT_HOME"
 
-  dd if=/dev/zero of="$IMAGE"/home.ext2 bs=1MiB count=512
+  dd if=/dev/zero of="$IMAGE"/home.ext2 bs=1MiB count=512 status=progress
   mkfs.ext2 "$IMAGE"/home.ext2
   mount -t ext2 "$IMAGE"/home.ext2 "$MNT_HOME"
 
