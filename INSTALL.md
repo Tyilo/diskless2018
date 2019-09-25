@@ -227,6 +227,13 @@ Since we have now configured `casper`, we need to recreate the initial ramdisk:
 update-initramfs -u
 ```
 
+Installing java requires a lot of open files apparently, so bump the limit
+and confirm that it works:
+```
+ulimit -n 10000
+ulimit -n
+```
+
 If you placed any `deb` or `tar.gz` files in `customization/software`, install them now.
 I ran the following commands to install Visual Studio Code, OpenJDK, BlueJ,
 IntelliJ, PyCharm, and the Kattis command-line interface:
@@ -274,11 +281,8 @@ running the following commands.
 Copy the kernel and initial ramdisk into `image/`:
 
 ```
-sudo cp chroot/boot/vmlinuz-4.15.0-20-generic image/vmlinuz && sudo cp chroot/boot/initrd.img-4.15.0-20-generic image/initrd
+sudo cp chroot/boot/vmlinuz-*-generic image/vmlinuz && sudo cp chroot/boot/initrd.img-*-generic image/initrd
 ```
-
-(Note, you might have to adjust the version numbers; `4.15.0-20` was the
-current kernel in Ubuntu 18.04 when I wrote this guide.)
 
 Create a new ext2 partition to serve as the home partition and mount it at `mnt-home`:
 
