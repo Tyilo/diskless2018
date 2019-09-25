@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
 Terminal=false
-Exec=/opt/pycharm-community-2018.2.3/bin/pycharm.sh
 Name=PyCharm
-Icon=/opt/pycharm-community-2018.2.3/bin/pycharm.png
+Exec=/opt/pycharm/bin/pycharm.sh
+Icon=/opt/pycharm/bin/pycharm.png

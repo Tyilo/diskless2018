@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Terminal=false
+Name=Visual Studio Code
+Exec=/opt/visual-studio-code/bin/code
+Icon=/opt/visual-studio-code/resources/app/resources/linux/code.png

@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Terminal=false
+Name=Atom
+Exec=/opt/atom/bin/atom
+Icon=/opt/atom/bin/atom.png
