@@ -272,6 +272,11 @@ create_homefs() {
   rmdir "$MNT_HOME"
 }
 
+if [ $# -eq 1 ]; then
+  eval $1
+  exit
+fi
+
 reset
 setup_base
 install_langs
