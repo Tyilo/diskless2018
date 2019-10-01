@@ -47,9 +47,11 @@ EOF2
   deb http://dk.archive.ubuntu.com/ubuntu disco main universe
   deb http://security.ubuntu.com/ubuntu/ disco-security universe main
   deb http://dk.archive.ubuntu.com/ubuntu disco-updates universe main
-  EOF2
+EOF2
 
-  apt-get update && apt-get install -y \
+  apt-get update
+  apt-get upgrade -y
+  apt-get install -y \
     linux-image-generic \
     build-essential \
     casper \
@@ -101,6 +103,7 @@ EOF2
     laptop-detect \
     mate-accessibility-profiles \
     mate-applet-appmenu \
+    mate-desktop-environment-core \
     mate-dock-applet \
     mate-hud \
     mate-menu \
@@ -121,12 +124,7 @@ EOF2
     clang \
     gedit \
     command-not-found \
-    xbacklight \
-    apport- \
-    grub-pc- \
-    blueman- \
-    thunderbird- \
-    unattended-upgrades-
+    xbacklight
 
   # fwupdate-signed
 
