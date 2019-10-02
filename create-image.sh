@@ -7,32 +7,50 @@ MNT_HOME="$PWD/mnt-home"
 CUSTOM="$PWD/customization"
 IMAGE="$PWD/image"
 
+run_in_chroot() {
+  (echo "
+  set -x
+  set -euo pipefail
+  export DEBIAN_FRONTEND=noninteractive
+  export DEBCONF_NONINTERACTIVE_SEEN=true
+  "; cat) | env -i chroot "$CHROOT" /bin/su
+}
+
+mount_proc() {
+  mount -t proc proc "$CHROOT"/proc
+}
+
+umount_proc() {
+  umount -lq "$CHROOT/proc"
+}
+
 reset() {
   if mountpoint -q "$CHROOT/proc"; then
-    umount -lq "$CHROOT/proc"
+    umount_proc
   fi
   rm --one-file-system -rf "$CHROOT"
 }
 
-setup_base() {
+bootstrap() {
   debootstrap --arch amd64 disco "$CHROOT" http://dk.archive.ubuntu.com/ubuntu/
+}
 
-  env -i chroot "$CHROOT" /bin/su <<'EOF'
-  set -x
-  set -euo pipefail
-  export DEBIAN_FRONTEND=noninteractive
+setup_base() {
+  # Required for installing udisks2 and libfprint0
+  mount_proc
 
+  run_in_chroot <<'EOF'
   passwd -l root
 
   echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | debconf-set-selections
   echo "locales locales/default_environment_locale select en_US.UTF-8" | debconf-set-selections
   rm /etc/locale.gen
-  dpkg-reconfigure -f noninteractive locales
+  dpkg-reconfigure locales
 
   TZ="Europe/Copenhagen"
   echo "$TZ" > /etc/timezone 
   ln -fs /usr/share/zoneinfo/"$TZ" /etc/localtime
-  dpkg-reconfigure -f noninteractive tzdata
+  dpkg-reconfigure tzdata
 
   cat > /etc/default/keyboard <<EOF2
   XKBMODEL="pc105"
@@ -124,11 +142,50 @@ EOF2
     clang \
     gedit \
     command-not-found \
-    xbacklight
+    xbacklight \
+    apport- \
+    grub-pc- \
+    blueman- \
+    thunderbird- \
+    unattended-upgrades-
 
   # fwupdate-signed
 
   apt-get install -y nodm
+
+  # From https://askubuntu.com/a/1115599/41269
+  set_dm() {
+    DISPLAY_MANAGER="gdm3"
+    DISPLAY_MANAGER_SERVICE="/etc/systemd/system/display-manager.service"
+    DEFAULT_DISPLAY_MANAGER_FILE="/etc/X11/default-display-manager"
+
+    if [ -n "${1}" ]
+    then
+        DISPLAY_MANAGER="$1"
+    fi
+
+    DISPLAY_MANAGER_BIN="/usr/sbin/${DISPLAY_MANAGER}"
+    if [ ! -e "${DISPLAY_MANAGER_BIN}" ]
+    then
+        echo "${DISPLAY_MANAGER} seems not to be a valid display manager or is not installed."
+    exit 1
+    fi
+
+    echo "${DISPLAY_MANAGER_BIN}" > "${DEFAULT_DISPLAY_MANAGER_FILE}"
+    DEBIAN_FRONTEND=noninteractive DEBCONF_NONINTERACTIVE_SEEN=true dpkg-reconfigure "${DISPLAY_MANAGER}"
+    echo set shared/default-x-display-manager "${DISPLAY_MANAGER}" | debconf-communicate &> /dev/null 
+
+    echo -n "systemd service is set to: "
+    readlink "${DISPLAY_MANAGER_SERVICE}" 
+
+    echo -n "${DEFAULT_DISPLAY_MANAGER_FILE} is set to: "
+    cat "${DEFAULT_DISPLAY_MANAGER_FILE}"
+
+    echo -n "debconf is set to: "
+    echo get shared/default-x-display-manager | debconf-communicate 
+  }
+
+  set_dm nodm
 
   apt-get -y autoremove && apt-get clean && du -shx /
 
@@ -137,19 +194,18 @@ EOF
 
   rsync -rptl "$CUSTOM/" "$CHROOT"
 
-  env -i chroot "$CHROOT" /bin/su <<'EOF'
-update-initramfs -u
+  run_in_chroot <<'EOF'
+  update-initramfs -u
 EOF
+
+  umount_proc
 }
 
 install_langs() {
-  mount -t proc proc "$CHROOT"/proc
+  # Required for java
+  mount_proc
 
-  env -i chroot "$CHROOT" /bin/su <<'EOF'
-  set -x
-  set -euo pipefail
-  export DEBIAN_FRONTEND=noninteractive
-
+  run_in_chroot <<'EOF'
   # Needed to install java
   ulimit -n 10000
 
@@ -211,11 +267,14 @@ install_langs() {
   apt-get install -y rustc
 EOF
 
-  umount -lq "$CHROOT/proc"
+  umount_proc
 }
 
 install_editors() {
-  env -i chroot "$CHROOT" /bin/su <<'EOF'
+  # Required for editors using java
+  mount_proc
+
+  run_in_chroot <<'EOF'
   # Kattis cli
   cd /opt
   git clone https://github.com/Kattis/kattis-cli
@@ -245,7 +304,10 @@ install_editors() {
   dpkg-query -W --showformat='${Package} ${Version}\n' > home/contest/filesystem.manifest
 EOF
 
+  # TODO: This is apparently broken?
   mv "$CHROOT"/home/contest/filesystem.manifest "$IMAGE"
+
+  umount_proc
 }
 
 create_squashfs() {
@@ -270,15 +332,54 @@ create_homefs() {
   rmdir "$MNT_HOME"
 }
 
-if [ $# -eq 1 ]; then
-  eval $1
-  exit
+CMDS=(
+  foo
+  reset
+  bootstrap
+  setup_base
+  install_langs
+  install_editors
+  create_squashfs
+  cp_kernel
+  create_homefs
+)
+
+usage() {
+  echo "Usage: sudo ./create-image.sh [--continue] [step]"
+  exit 1
+}
+
+should_continue=false
+
+if [ $# -eq 2 ]; then
+  if [ "$1" = "--continue" ]; then
+    should_continue=true
+    shift
+  else
+    usage
+  fi
 fi
 
-reset
-setup_base
-install_langs
-install_editors
-create_squashfs
-cp_kernel
-create_homefs
+if [ $# -eq 0 ]; then
+  should_continue=true
+  set reset
+fi
+
+if [ $# -eq 1 ]; then
+  found=false
+  for cmd in "${CMDS[@]}"; do
+    if [ "$1" = "$cmd" ]; then
+      found=true
+    fi
+
+    if $found; then
+      eval "$cmd"
+    fi
+
+    if ! $should_continue; then
+      break
+    fi
+  done
+
+  exit
+fi
