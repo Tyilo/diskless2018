@@ -1,0 +1,12 @@
+
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Name=BlueJ
+Comment=A simple powerful Java IDE
+Categories=Application;Development;
+Exec=/usr/bin/bluej
+Icon=/usr/share/bluej/images/bluej-icon-256.png
+Terminal=false
+Type=Application
+
