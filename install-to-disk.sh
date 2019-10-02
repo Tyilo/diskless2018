@@ -101,3 +101,6 @@ grub-install --target=x86_64-efi --efi-directory=mnt-$DISK/efi --boot-directory=
 grub-install --target=i386-pc --boot-directory=mnt-$DISK/usb/boot --recheck "/dev/$DISK"
 time rsync -r image/ mnt-$DISK/usb/
 time umount mnt-$DISK/usb mnt-$DISK/efi
+
+rmdir mnt-$DISK/usb mnt-$DISK/efi
+rmdir mnt-$DISK
