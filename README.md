@@ -9,7 +9,7 @@ til DM i Programmering er installeret på forhånd:
 
 * Standard editors: vim, emacs, nano, gedit
 * Populære IDE'er: IntelliJ, PyCharm, VS Code, BlueJ, Atom, Sublime Text
-* Sædvanlige compilers: gcc, clang, OpenJDK, Python 3, pypy og mange flere
+* Compilers: gcc, clang, OpenJDK, Python 3, pypy og mange flere
   (se https://ncpc19.kattis.com/help)
   * Disse kan tilgås i terminalen via kommandoerne (`mygcc`, `myg++`, `myjavac`, etc.)
     Så er de sat op med samme indstillinger som Kattis bruger.
