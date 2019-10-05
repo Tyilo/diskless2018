@@ -1,5 +1,13 @@
-Future work (after 2018)
+Future work (after 2019)
 ========================
+
+* Add a password to the contest user, if the user manages to logout.
+
+* Fix that screen brightness can't be adjusted.
+
+* Fix HiDPI displays.
+
+* Support external monitors.
 
 * Install NVIDIA drivers on image!
 
@@ -26,18 +34,7 @@ Rather than booting into the image and configuring /home manually, it would be n
 
 * Firefox bookmarks
 
-* Launchers on desktop
-
-* Disabling screensaver
-
-* Aliases in .bashrc to set keyboard layout
-
-Unattended install script
--------------------------
-
-The following things can probably be done with a script instead of manual menuing:
-
-* Configuration of packages locales, tzdata, keyboard-configuration, nodm
+* Disabling screensaver (not using qemu and with a laptop on battery power)
 
 Running in RAM
 --------------
